@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Travel Dashboard</title>
+<title>Miguel's Travel Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -17,345 +17,363 @@
     color: #e0e0e0;
     overflow-x: hidden;
   }
-
+  
   .header {
     text-align: center;
-    padding: 24px 20px 12px;
+    padding: 30px 20px 10px;
     background: linear-gradient(180deg, #12121a 0%, #0a0a0f 100%);
   }
-
+  
   .header h1 {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
     background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: -0.5px;
+    margin-bottom: 4px;
   }
-
-  .header .subtitle {
+  
+  .header p {
     font-size: 13px;
-    color: #64748b;
-    margin-top: 4px;
+    color: #666;
+    font-weight: 300;
   }
-
-  .layout {
-    display: flex;
-    height: calc(100vh - 80px);
-  }
-
-  @media (max-width: 900px) {
-    .layout { flex-direction: column; height: auto; }
-    #map { height: 50vh !important; min-height: 300px; }
-    .timeline { height: auto !important; max-height: 50vh; }
-  }
-
+  
   #map {
-    flex: 1;
-    min-height: 400px;
-    z-index: 1;
+    width: 100%;
+    height: 420px;
+    border-top: 1px solid #1a1a2e;
+    border-bottom: 1px solid #1a1a2e;
   }
-
-  .timeline {
-    width: 380px;
-    overflow-y: auto;
-    padding: 16px;
-    background: #0f0f17;
-    border-left: 1px solid #1e1e2e;
+  
+  .timeline-section {
+    padding: 24px 20px;
+    max-width: 700px;
+    margin: 0 auto;
   }
-
-  @media (max-width: 900px) {
-    .timeline { width: 100%; border-left: none; border-top: 1px solid #1e1e2e; }
-  }
-
-  .timeline h2 {
-    font-size: 14px;
-    font-weight: 600;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #1e1e2e;
-  }
-
-  .trip-card {
-    background: #161622;
-    border: 1px solid #1e1e2e;
-    border-radius: 10px;
-    padding: 14px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .trip-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-  }
-
-  .trip-card.booked::before { background: #22c55e; }
-  .trip-card.pending::before { background: #f59e0b; }
-  .trip-card.past::before { background: #475569; }
-
-  .trip-card:hover {
-    border-color: #334155;
-    transform: translateX(2px);
-  }
-
-  .trip-card.active {
-    border-color: #60a5fa;
-    box-shadow: 0 0 20px rgba(96, 165, 250, 0.1);
-  }
-
-  .trip-city {
+  
+  .timeline-section h2 {
     font-size: 16px;
     font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+  }
+  
+  .month-group {
+    margin-bottom: 28px;
+  }
+  
+  .month-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+  
+  .trip-card {
+    display: flex;
+    align-items: stretch;
+    background: #12121a;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    border: 1px solid #1a1a2e;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  
+  .trip-card:hover {
+    border-color: #333;
+    transform: translateX(4px);
+  }
+  
+  .trip-accent {
+    width: 4px;
+    flex-shrink: 0;
+  }
+  
+  .trip-content {
+    padding: 14px 16px;
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .trip-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
   }
-
-  .trip-flag { font-size: 20px; }
-
-  .trip-dates {
+  
+  .trip-flag {
+    font-size: 28px;
+    line-height: 1;
+  }
+  
+  .trip-info h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 2px;
+  }
+  
+  .trip-info .dates {
     font-size: 12px;
-    color: #94a3b8;
-    margin-top: 4px;
+    color: #888;
+    font-weight: 400;
   }
-
-  .trip-details {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #64748b;
-    line-height: 1.6;
-    display: none;
+  
+  .trip-info .details {
+    font-size: 11px;
+    color: #555;
+    margin-top: 3px;
   }
-
-  .trip-card.active .trip-details { display: block; }
-
-  .trip-badge {
-    display: inline-block;
+  
+  .trip-right {
+    text-align: right;
+  }
+  
+  .trip-status {
     font-size: 10px;
     font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-left: auto;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    border-radius: 6px;
   }
-
-  .badge-booked { background: rgba(34,197,94,0.15); color: #22c55e; }
-  .badge-pending { background: rgba(245,158,11,0.15); color: #f59e0b; }
-  .badge-past { background: rgba(71,85,105,0.15); color: #64748b; }
-
-  .trip-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  
+  .status-booked {
+    background: #0d2818;
+    color: #4ade80;
+  }
+  
+  .status-tentative {
+    background: #2a1f00;
+    color: #fbbf24;
+  }
+  
+  .status-not-booked {
+    background: #1a0a0a;
+    color: #f87171;
+  }
+  
+  .trip-days {
+    font-size: 11px;
+    color: #555;
+    margin-top: 6px;
   }
 
   .legend {
     display: flex;
-    gap: 16px;
-    padding: 8px 16px;
     justify-content: center;
-    font-size: 11px;
-    color: #64748b;
+    gap: 20px;
+    padding: 16px;
+    flex-wrap: wrap;
   }
-
+  
   .legend-item {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    font-size: 11px;
+    color: #666;
   }
-
+  
   .legend-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
   }
 
-  .dot-booked { background: #22c55e; }
-  .dot-pending { background: #f59e0b; }
-  .dot-past { background: #475569; }
-
-  .countdown {
-    font-size: 11px;
-    color: #a78bfa;
-    font-weight: 500;
-    margin-top: 2px;
+  /* Leaflet custom */
+  .leaflet-container { background: #0a0a0f; }
+  
+  .city-label {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6);
+    white-space: nowrap;
   }
-
-  /* Custom scrollbar */
-  .timeline::-webkit-scrollbar { width: 4px; }
-  .timeline::-webkit-scrollbar-track { background: #0f0f17; }
-  .timeline::-webkit-scrollbar-thumb { background: #1e1e2e; border-radius: 4px; }
-
-  /* Leaflet popup styling */
-  .leaflet-popup-content-wrapper {
-    background: #161622 !important;
-    color: #e0e0e0 !important;
-    border-radius: 10px !important;
-    border: 1px solid #1e1e2e !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+  
+  .pulse-marker {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.8);
+    animation: pulse 2s ease-in-out infinite;
   }
-
-  .leaflet-popup-tip { background: #161622 !important; }
-
-  .leaflet-popup-content {
-    font-family: 'Inter', sans-serif !important;
-    font-size: 13px !important;
-    line-height: 1.5 !important;
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.3); opacity: 1; }
   }
-
-  .popup-city { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-  .popup-dates { color: #94a3b8; font-size: 12px; }
-  .popup-detail { color: #64748b; font-size: 11px; margin-top: 4px; }
+  
+  .home-marker {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #60a5fa;
+    border: 3px solid #fff;
+    box-shadow: 0 0 12px rgba(96,165,250,0.6);
+  }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>✈️ Travel Dashboard</h1>
-  <div class="subtitle">March — May 2026</div>
+  <h1>✈️ Travel Map — Mar to May 2026</h1>
+  <p>7 trips · 6 countries · Work + Play</p>
 </div>
+
+<div id="map"></div>
 
 <div class="legend">
-  <div class="legend-item"><div class="legend-dot dot-past"></div> Past</div>
-  <div class="legend-item"><div class="legend-dot dot-booked"></div> Booked</div>
-  <div class="legend-item"><div class="legend-dot dot-pending"></div> Pending</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div> Booked</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Tentative</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Not Booked</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> Home</div>
 </div>
 
-<div class="layout">
-  <div id="map"></div>
-  <div class="timeline">
-    <h2>Upcoming Trips</h2>
-    <div id="trip-list"></div>
+<div class="timeline-section">
+  <h2>Timeline</h2>
+  
+  <div class="month-group">
+    <div class="month-label">March</div>
+    
+    <div class="trip-card">
+      <div class="trip-accent" style="background:#4ade80"></div>
+      <div class="trip-content">
+        <div class="trip-left">
+          <div class="trip-flag">🇳🇱🇧🇪</div>
+          <div class="trip-info">
+            <h3>Amsterdam → Brussels</h3>
+            <div class="dates">Mar 17 – 19</div>
+            <div class="details">TP668 LIS→AMS · Train AMS→BRU · TP645 BRU→LIS</div>
+          </div>
+        </div>
+        <div class="trip-right">
+          <div class="trip-status status-booked">Booked</div>
+          <div class="trip-days">3 days</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="trip-card">
+      <div class="trip-accent" style="background:#4ade80"></div>
+      <div class="trip-content">
+        <div class="trip-left">
+          <div class="trip-flag">🇬🇧</div>
+          <div class="trip-info">
+            <h3>London</h3>
+            <div class="dates">Mar 25 – 29</div>
+            <div class="details">TP1352 LIS→LHR · WFF @ St. Paul's · Weekend with sister · TP1357 LHR→LIS</div>
+          </div>
+        </div>
+        <div class="trip-right">
+          <div class="trip-status status-booked">Booked</div>
+          <div class="trip-days">5 days</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="month-group">
+    <div class="month-label">April</div>
+    
+    <div class="trip-card">
+      <div class="trip-accent" style="background:#fbbf24"></div>
+      <div class="trip-content">
+        <div class="trip-left">
+          <div class="trip-flag">🇸🇪</div>
+          <div class="trip-info">
+            <h3>Sweden → Paris</h3>
+            <div class="dates">~Apr 6 – 9</div>
+            <div class="details">Work · Then board meeting in Paris Apr 9</div>
+          </div>
+        </div>
+        <div class="trip-right">
+          <div class="trip-status status-tentative">Tentative</div>
+          <div class="trip-days">~4 days</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trip-card">
+      <div class="trip-accent" style="background:#f87171"></div>
+      <div class="trip-content">
+        <div class="trip-left">
+          <div class="trip-flag">🇫🇷</div>
+          <div class="trip-info">
+            <h3>Paris</h3>
+            <div class="dates">Apr 9</div>
+            <div class="details">Board meeting · Fly from Sweden</div>
+          </div>
+        </div>
+        <div class="trip-right">
+          <div class="trip-status status-not-booked">Not Booked</div>
+          <div class="trip-days">1 day</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="trip-card">
+      <div class="trip-accent" style="background:#f87171"></div>
+      <div class="trip-content">
+        <div class="trip-left">
+          <div class="trip-flag">🇫🇷🇪🇸</div>
+          <div class="trip-info">
+            <h3>Paris → Jerez</h3>
+            <div class="dates">Apr 22 – 25</div>
+            <div class="details">Exec team meeting · Jerez · Dia da Liberdade 🇵🇹</div>
+          </div>
+        </div>
+        <div class="trip-right">
+          <div class="trip-status status-not-booked">Not Booked</div>
+          <div class="trip-days">~4 days</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="month-group">
+    <div class="month-label">May</div>
+    
+    <div class="trip-card">
+      <div class="trip-accent" style="background:#f87171"></div>
+      <div class="trip-content">
+        <div class="trip-left">
+          <div class="trip-flag">🇳🇴</div>
+          <div class="trip-info">
+            <h3>Oslo</h3>
+            <div class="dates">May 16 – 21</div>
+            <div class="details">Syttende Mai 🎉 + Work (Mon–Wed)</div>
+          </div>
+        </div>
+        <div class="trip-right">
+          <div class="trip-status status-not-booked">Not Booked</div>
+          <div class="trip-days">6 days</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-const LISBON = [38.7223, -9.1393];
-
-const trips = [
-  {
-    id: 'ams-bru',
-    city: 'Amsterdam + Brussels',
-    flag: '🇳🇱🇧🇪',
-    coords: [52.3676, 4.9041],
-    coordsEnd: [50.8503, 4.3517],
-    dates: 'Mar 17 — 19',
-    startDate: '2026-03-17',
-    endDate: '2026-03-19',
-    status: 'booked',
-    details: [
-      '✈️ Tue 17: TP668 LIS→AMS 08:40 (Seat 16F)',
-      '🚆 Train AMS → Brussels',
-      '✈️ Thu 19: TP645 BRU→LIS 17:55 (Seat 16F)',
-      '💼 Work meetings'
-    ]
-  },
-  {
-    id: 'london',
-    city: 'London',
-    flag: '🇬🇧',
-    coords: [51.5074, -0.1278],
-    dates: 'Mar 25 — 29',
-    startDate: '2026-03-25',
-    endDate: '2026-03-29',
-    status: 'booked',
-    details: [
-      '✈️ Wed 25: TP1352 LIS→LHR 09:50',
-      '🏦 Thu 26: World Finance Forum',
-      '📍 Convene Sancroft, St. Paul\'s (EC4M 7DQ)',
-      '🏠 Fri 27-Sun 29: Staying with Anna',
-      '✈️ Sun 29: TP1357 LHR→LIS 18:45'
-    ]
-  },
-  {
-    id: 'stockholm',
-    city: 'Stockholm',
-    flag: '🇸🇪',
-    coords: [59.3293, 18.0686],
-    dates: '~Apr 6 — 10',
-    startDate: '2026-04-06',
-    endDate: '2026-04-10',
-    status: 'pending',
-    details: [
-      '⏳ Pending confirmation',
-      '💼 Work — week of Apr 6',
-      '📝 Apr 9 Paris meeting may go remote if here'
-    ]
-  },
-  {
-    id: 'paris',
-    city: 'Paris',
-    flag: '🇫🇷',
-    coords: [48.8566, 2.3522],
-    dates: 'Apr 22',
-    startDate: '2026-04-22',
-    endDate: '2026-04-22',
-    status: 'pending',
-    details: [
-      '⏳ Not booked yet',
-      '💼 Need to be there in person',
-      '🔗 Possible Paris → Jerez direct (Apr 24)'
-    ]
-  },
-  {
-    id: 'jerez',
-    city: 'Jerez',
-    flag: '🇪🇸',
-    coords: [36.6850, -6.1261],
-    dates: 'Apr 24',
-    startDate: '2026-04-24',
-    endDate: '2026-04-24',
-    status: 'pending',
-    details: [
-      '⏳ Logistics TBD',
-      '🔗 Possibly direct from Paris',
-      '🇵🇹 Apr 25 is Dia da Liberdade (bank holiday)'
-    ]
-  },
-  {
-    id: 'oslo',
-    city: 'Oslo',
-    flag: '🇳🇴',
-    coords: [59.9139, 10.7522],
-    dates: 'May 16 — 21',
-    startDate: '2026-05-16',
-    endDate: '2026-05-21',
-    status: 'pending',
-    details: [
-      '⏳ Not booked yet',
-      '✈️ Sat 16: Fly in',
-      '🎉 Sun 17: Syttende Mai (Norwegian National Day)',
-      '💼 Mon-Wed 19-21: Work',
-      '✈️ Wed/Thu: Fly back'
-    ]
-  }
-];
-
-// Determine past trips
-const today = new Date();
-today.setHours(0,0,0,0);
-trips.forEach(t => {
-  const end = new Date(t.endDate + 'T23:59:59');
-  if (end < today) t.status = 'past';
-});
-
-// Initialize map
 const map = L.map('map', {
-  center: [50, 8],
-  zoom: 4,
-  zoomControl: true,
+  center: [52, 8],
+  zoom: 5,
+  zoomControl: false,
   attributionControl: false
 });
 
@@ -363,136 +381,77 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   maxZoom: 18
 }).addTo(map);
 
-// Colors
-const colors = {
-  booked: '#22c55e',
-  pending: '#f59e0b',
-  past: '#475569'
-};
+L.control.zoom({ position: 'topright' }).addTo(map);
 
-// Draw routes and markers
-const markers = {};
+const cities = [
+  { name: 'Lisbon', lat: 38.7223, lng: -9.1393, color: '#60a5fa', home: true },
+  { name: 'Amsterdam', lat: 52.3676, lng: 4.9041, color: '#4ade80' },
+  { name: 'Brussels', lat: 50.8503, lng: 4.3517, color: '#4ade80' },
+  { name: 'London', lat: 51.5074, lng: -0.1278, color: '#4ade80' },
+  { name: 'Stockholm', lat: 59.3293, lng: 18.0686, color: '#fbbf24' },
+  { name: 'Paris', lat: 48.8566, lng: 2.3522, color: '#f87171' },
+  { name: 'Jerez', lat: 36.6850, lng: -6.1261, color: '#f87171' },
+  { name: 'Oslo', lat: 59.9139, lng: 10.7522, color: '#f87171' },
+];
 
-trips.forEach(trip => {
-  const color = colors[trip.status];
-  
-  // Route line from Lisbon
-  const route = L.polyline([LISBON, trip.coords], {
-    color: color,
-    weight: 2,
-    opacity: trip.status === 'past' ? 0.3 : 0.6,
-    dashArray: trip.status === 'pending' ? '8 6' : null
+// Draw routes from Lisbon
+const routes = [
+  ['Lisbon', 'Amsterdam'],
+  ['Amsterdam', 'Brussels'],
+  ['Brussels', 'Lisbon'],
+  ['Lisbon', 'London'],
+  ['London', 'Lisbon'],
+  ['Lisbon', 'Stockholm'],
+  ['Stockholm', 'Paris'],
+  ['Paris', 'Lisbon'],
+  ['Lisbon', 'Paris'],
+  ['Paris', 'Jerez'],
+  ['Jerez', 'Lisbon'],
+  ['Lisbon', 'Oslo'],
+  ['Oslo', 'Lisbon'],
+];
+
+const cityMap = {};
+cities.forEach(c => cityMap[c.name] = c);
+
+routes.forEach(([from, to]) => {
+  const a = cityMap[from], b = cityMap[to];
+  L.polyline([[a.lat, a.lng], [b.lat, b.lng]], {
+    color: '#333',
+    weight: 1.5,
+    dashArray: '6, 8',
+    opacity: 0.6
   }).addTo(map);
-
-  // If trip has two cities (AMS+BRU), draw connection
-  if (trip.coordsEnd) {
-    L.polyline([trip.coords, trip.coordsEnd], {
-      color: color,
-      weight: 2,
-      opacity: trip.status === 'past' ? 0.3 : 0.6,
-      dashArray: trip.status === 'pending' ? '8 6' : null
-    }).addTo(map);
-
-    // Return line from end city
-    L.polyline([trip.coordsEnd, LISBON], {
-      color: color,
-      weight: 2,
-      opacity: trip.status === 'past' ? 0.3 : 0.4,
-      dashArray: '4 8'
-    }).addTo(map);
-
-    // End city marker
-    L.circleMarker(trip.coordsEnd, {
-      radius: 5,
-      fillColor: color,
-      color: color,
-      weight: 1,
-      opacity: trip.status === 'past' ? 0.4 : 0.8,
-      fillOpacity: trip.status === 'past' ? 0.3 : 0.6
-    }).addTo(map).bindPopup(`
-      <div class="popup-city">${trip.flag} Brussels</div>
-      <div class="popup-dates">${trip.dates}</div>
-      <div class="popup-detail">Part of Amsterdam + Brussels trip</div>
-    `);
-  }
-
-  // City marker
-  const marker = L.circleMarker(trip.coords, {
-    radius: trip.status === 'past' ? 5 : 7,
-    fillColor: color,
-    color: color,
-    weight: 2,
-    opacity: trip.status === 'past' ? 0.4 : 0.9,
-    fillOpacity: trip.status === 'past' ? 0.3 : 0.7
-  }).addTo(map);
-
-  marker.bindPopup(`
-    <div class="popup-city">${trip.flag} ${trip.city}</div>
-    <div class="popup-dates">${trip.dates}</div>
-    <div class="popup-detail">${trip.details[0]}</div>
-  `);
-
-  markers[trip.id] = { marker, route };
 });
 
-// Lisbon home marker
-L.circleMarker(LISBON, {
-  radius: 8,
-  fillColor: '#60a5fa',
-  color: '#60a5fa',
-  weight: 2,
-  opacity: 0.9,
-  fillOpacity: 0.7
-}).addTo(map).bindPopup('<div class="popup-city">🏠 Lisbon</div><div class="popup-dates">Home base</div>');
-
-// Build timeline
-const tripList = document.getElementById('trip-list');
-
-function daysUntil(dateStr) {
-  const target = new Date(dateStr + 'T00:00:00');
-  const now = new Date();
-  now.setHours(0,0,0,0);
-  const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return null;
-  if (diff === 0) return 'Today!';
-  if (diff === 1) return 'Tomorrow';
-  return `In ${diff} days`;
-}
-
-trips.forEach(trip => {
-  const card = document.createElement('div');
-  card.className = `trip-card ${trip.status}`;
-  card.dataset.id = trip.id;
-
-  const badgeClass = `badge-${trip.status}`;
-  const badgeText = trip.status === 'booked' ? 'Booked' : trip.status === 'pending' ? 'Pending' : 'Past';
-  const countdown = trip.status !== 'past' ? daysUntil(trip.startDate) : null;
-
-  card.innerHTML = `
-    <div class="trip-header">
-      <div>
-        <div class="trip-city"><span class="trip-flag">${trip.flag}</span> ${trip.city}</div>
-        <div class="trip-dates">${trip.dates}</div>
-        ${countdown ? `<div class="countdown">${countdown}</div>` : ''}
-      </div>
-      <span class="trip-badge ${badgeClass}">${badgeText}</span>
-    </div>
-    <div class="trip-details">
-      ${trip.details.map(d => `<div>${d}</div>`).join('')}
-    </div>
-  `;
-
-  card.addEventListener('click', () => {
-    // Toggle active
-    document.querySelectorAll('.trip-card').forEach(c => c.classList.remove('active'));
-    card.classList.toggle('active');
-    
-    // Pan map
-    map.flyTo(trip.coords, 6, { duration: 0.8 });
-    markers[trip.id].marker.openPopup();
-  });
-
-  tripList.appendChild(card);
+// Add city markers
+cities.forEach(city => {
+  if (city.home) {
+    const el = L.divIcon({
+      className: '',
+      html: `<div class="home-marker"></div>`,
+      iconSize: [16, 16],
+      iconAnchor: [8, 8]
+    });
+    L.marker([city.lat, city.lng], { icon: el }).addTo(map);
+  } else {
+    const el = L.divIcon({
+      className: '',
+      html: `<div class="pulse-marker" style="background:${city.color}"></div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7]
+    });
+    L.marker([city.lat, city.lng], { icon: el }).addTo(map);
+  }
+  
+  // Label
+  L.marker([city.lat, city.lng], {
+    icon: L.divIcon({
+      className: 'city-label',
+      html: city.home ? `🏠 ${city.name}` : city.name,
+      iconAnchor: [-10, 6]
+    })
+  }).addTo(map);
 });
 </script>
 
